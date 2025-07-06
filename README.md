@@ -1,6 +1,6 @@
 # 🧠 TokenWise — Real-Time Wallet Intelligence on Solana
 
-A comprehensive real-time intelligence tool designed to monitor and analyze wallet behavior for specific tokens on the Solana blockchain. TokenWise tracks the top 60 token holders, captures their transaction activity in real-time, and provides market trend analysis through a beautiful dashboard.
+A comprehensive real-time intelligence tool designed to monitor and analyze wallet behavior for specific tokens on the Solana blockchain. TokenWise tracks the top 60 token holders, captures their transaction activity in real-time, and provides market trend analysis through a beautiful dashboard with advanced filtering capabilities.
 
 ## 🎯 Features
 
@@ -8,9 +8,10 @@ A comprehensive real-time intelligence tool designed to monitor and analyze wall
 - **⚡ Real-Time Monitoring**: Live transaction monitoring with WebSocket connections
 - **📊 Protocol Identification**: Identifies trading protocols (Jupiter, Raydium, Orca, etc.)
 - **📈 Interactive Dashboard**: Beautiful React dashboard with real-time charts and statistics
-- **📋 Historical Analysis**: Query past activity with custom time filters
+- **📅 Historical Analysis**: Query past activity with custom time filters and date range selection
 - **📤 Data Export**: Export transaction data as CSV for further analysis
 - **🔄 Auto-Refresh**: Automatic data refresh every 30 seconds
+- **🎨 Modern UI**: Responsive design with professional styling and intuitive user experience
 
 ## 🏗️ Architecture
 
@@ -45,8 +46,8 @@ TokenWise/
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd tokenwise
+   git clone https://github.com/noelregis18/Solana-wallet.git
+   cd Solana-wallet
    ```
 
 2. **Install backend dependencies**
@@ -103,8 +104,9 @@ TokenWise/
 - **Transaction Activity**: Bar chart showing buy vs sell volume
 - **Protocol Distribution**: Doughnut chart of protocol usage
 
-### Transaction Feed
+### Transaction Feed with Date Filtering
 - **Live Updates**: Real-time transaction feed with 30-second refresh
+- **Date Range Filter**: Select custom start and end dates to filter transactions
 - **Transaction Details**: Amount, wallet address, protocol, timestamp
 - **External Links**: Direct links to Solscan for transaction verification
 
@@ -118,7 +120,7 @@ TokenWise/
 |----------|--------|-------------|
 | `/api/dashboard` | GET | Get dashboard statistics |
 | `/api/wallets` | GET | Get top wallet holders |
-| `/api/transactions` | GET | Get recent transactions |
+| `/api/transactions` | GET | Get recent transactions with date filtering |
 | `/api/protocols` | GET | Get protocol statistics |
 | `/api/token` | GET | Get token information |
 | `/api/export/transactions` | GET | Export transactions as CSV |
@@ -126,7 +128,13 @@ TokenWise/
 
 ### Query Parameters
 
-- `limit`: Number of records to return (default: 50 for transactions, 60 for wallets)
+#### `/api/transactions` Endpoint
+- `limit`: Number of records to return (default: 50)
+- `startDate`: Filter transactions from this date (ISO format: YYYY-MM-DD)
+- `endDate`: Filter transactions until this date (ISO format: YYYY-MM-DD)
+
+#### `/api/wallets` Endpoint
+- `limit`: Number of wallets to return (default: 60)
 
 ### Example Usage
 
@@ -139,6 +147,12 @@ curl http://localhost:3001/api/wallets?limit=30
 
 # Get recent 100 transactions
 curl http://localhost:3001/api/transactions?limit=100
+
+# Get transactions from last 7 days
+curl "http://localhost:3001/api/transactions?startDate=2024-01-01&endDate=2024-01-07"
+
+# Get transactions with custom date range
+curl "http://localhost:3001/api/transactions?startDate=2024-01-01T00:00:00&endDate=2024-01-31T23:59:59&limit=200"
 
 # Export transactions
 curl http://localhost:3001/api/export/transactions -o transactions.csv
@@ -169,7 +183,12 @@ The application uses SQLite for data storage. The database file is automatically
 
 **Tables:**
 - `wallets`: Top token holder information
-- `transactions`: Transaction history and details
+- `transactions`: Transaction history and details with timestamp indexing
+
+**Database Features:**
+- Automatic table creation and indexing
+- Optimized queries for date range filtering
+- Foreign key relationships between wallets and transactions
 
 ## 🔍 Monitoring Features
 
@@ -183,6 +202,12 @@ The system automatically identifies trading protocols:
 - **Jupiter**: `JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB`
 - **Raydium**: `675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8`
 - **Orca**: `9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM`
+
+### Date Range Filtering
+- **Custom Date Selection**: Users can select start and end dates via the dashboard UI
+- **API Integration**: Backend supports ISO date format filtering
+- **Database Optimization**: Indexed timestamp queries for fast filtering
+- **Real-time Updates**: Filtered results update automatically when date range changes
 
 ## 📈 Data Export
 
@@ -198,44 +223,50 @@ curl http://localhost:3001/api/export/transactions -o transactions.csv
 ID,Wallet Address,Type,Amount,Token Amount,Protocol,Timestamp,Signature
 ```
 
-## 🚨 Error Handling
+## 🎨 User Interface
 
-The application includes comprehensive error handling:
+### Dashboard Components
+- **StatsCards**: Real-time statistics display
+- **TransactionChart**: Interactive transaction volume charts
+- **ProtocolChart**: Protocol usage visualization
+- **RecentTransactions**: Transaction feed with date filtering
+- **TokenInfoCard**: Token metadata display
 
-- **Network Errors**: Automatic retry with exponential backoff
-- **Database Errors**: Graceful degradation with error logging
-- **API Errors**: Proper HTTP status codes and error messages
-- **Frontend Errors**: User-friendly error messages with retry options
+### Responsive Design
+- Mobile-friendly interface
+- Professional styling with CSS
+- Intuitive date picker controls
+- Loading states and error handling
 
-## 🔒 Security
+## 🔧 Technical Stack
 
-- **CORS Protection**: Configured for secure cross-origin requests
-- **Helmet.js**: Security headers for Express server
-- **Input Validation**: All API inputs are validated
-- **Rate Limiting**: Built-in rate limiting for API endpoints
+### Backend
+- **Node.js** with TypeScript
+- **Express.js** for API routing
+- **SQLite** for data persistence
+- **@solana/web3.js** for blockchain integration
+- **WebSocket** for real-time monitoring
 
-## 📱 Responsive Design
+### Frontend
+- **React** with TypeScript
+- **Chart.js** for data visualization
+- **Axios** for API communication
+- **date-fns** for date manipulation
+- **CSS** for styling
 
-The dashboard is fully responsive and works on:
-- Desktop computers
-- Tablets
-- Mobile devices
+## 🚀 Deployment
 
-## 🧪 Testing
-
+### Environment Variables
 ```bash
-# Run backend tests
-npm test
-
-# Run frontend tests
-cd dashboard
-npm test
+SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+SOLANA_WS_URL=wss://api.mainnet-beta.solana.com
+TARGET_TOKEN_ADDRESS=your_token_address_here
+PORT=3001
+DASHBOARD_PORT=3000
+DB_PATH=./data/tokenwise.db
 ```
 
-## 📦 Deployment
-
 ### Production Build
-
 ```bash
 # Build backend
 npm run build
@@ -244,18 +275,7 @@ npm run build
 cd dashboard
 npm run build
 cd ..
-
-# Start production server
-npm start
 ```
-
-### Environment Variables
-
-For production deployment, consider using:
-- **Enhanced RPC**: Use a dedicated Solana RPC endpoint for better performance
-- **Database**: Consider PostgreSQL for production use
-- **Caching**: Implement Redis for better performance
-- **Monitoring**: Add application monitoring and logging
 
 ## 🤝 Contributing
 
@@ -269,22 +289,12 @@ For production deployment, consider using:
 
 This project is licensed under the MIT License.
 
-## 🆘 Support
+## 🙏 Acknowledgments
 
-For support and questions:
-- Create an issue in the repository
-- Check the documentation
-- Review the API endpoints
-
-## 🔮 Future Enhancements
-
-- **Multi-Token Support**: Monitor multiple tokens simultaneously
-- **Advanced Analytics**: Price correlation, volume analysis
-- **Alert System**: Custom alerts for specific wallet activities
-- **Mobile App**: Native mobile application
-- **API Rate Limiting**: Enhanced rate limiting and API keys
-- **WebSocket Dashboard**: Real-time dashboard updates via WebSocket
+- Solana Labs for the blockchain infrastructure
+- The Solana community for tools and libraries
+- Contributors and maintainers
 
 ---
 
-**TokenWise** - Your gateway to real-time Solana wallet intelligence! 🚀 
+**TokenWise** - Empowering traders with real-time Solana wallet intelligence 🧠⚡ 

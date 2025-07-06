@@ -22,8 +22,11 @@ export const apiService = {
   },
 
   // Transactions
-  getRecentTransactions: async (limit: number = 50): Promise<Transaction[]> => {
-    const response = await api.get(`/api/transactions?limit=${limit}`);
+  getRecentTransactions: async (limit: number = 50, startDate?: string, endDate?: string): Promise<Transaction[]> => {
+    let url = `/api/transactions?limit=${limit}`;
+    if (startDate) url += `&startDate=${encodeURIComponent(startDate)}`;
+    if (endDate) url += `&endDate=${encodeURIComponent(endDate)}`;
+    const response = await api.get(url);
     return response.data;
   },
 

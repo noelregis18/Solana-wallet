@@ -31,7 +31,9 @@ router.get('/api/wallets', async (req, res) => {
 router.get('/api/transactions', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit as string) || 50;
-    const transactions = await monitoringService['database'].getRecentTransactions(limit);
+    const startDate = req.query.startDate as string | undefined;
+    const endDate = req.query.endDate as string | undefined;
+    const transactions = await monitoringService['database'].getRecentTransactions(limit, startDate, endDate);
     res.json(transactions);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch transactions' });

@@ -134,16 +134,38 @@ export class Database {
     });
   }
 
-  async getRecentTransactions(limit: number = 50): Promise<any[]> {
+  async getRecentTransactions(limit: number = 50, startDate?: string, endDate?: string): Promise<any[]> {
+    let query = `SELECT 
+      id,
+      wallet_address as walletAddress,
+      type,
+      amount,
+      token_amount as tokenAmount,
+      protocol,
+      timestamp,
+      signature,
+      block_time as blockTime
+    FROM transactions`;
+    const params: any[] = [];
+    const conditions: string[] = [];
+    if (startDate) {
+      conditions.push('timestamp >= ?');
+      params.push(startDate);
+    }
+    if (endDate) {
+      conditions.push('timestamp <= ?');
+      params.push(endDate);
+    }
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+    query += ' ORDER BY timestamp DESC LIMIT ?';
+    params.push(limit);
     return new Promise((resolve, reject) => {
-      this.db.all(
-        `SELECT * FROM transactions ORDER BY timestamp DESC LIMIT ?`,
-        [limit],
-        (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows);
-        }
-      );
+      this.db.all(query, params, (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
     });
   }
 

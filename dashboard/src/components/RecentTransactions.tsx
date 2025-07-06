@@ -8,11 +8,13 @@ interface RecentTransactionsProps {
 }
 
 const RecentTransactions: React.FC<RecentTransactionsProps> = ({ transactions }) => {
-  const formatAddress = (address: string) => {
+  const formatAddress = (address: string | undefined) => {
+    if (!address) return 'Unknown';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  const formatAmount = (amount: number) => {
+  const formatAmount = (amount: number | undefined) => {
+    if (amount === undefined || amount === null) return '0';
     return amount.toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 6,
@@ -33,7 +35,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ transactions })
           </div>
         ) : (
           transactions.map((tx) => (
-            <div key={tx.id} className={`transaction-item ${tx.type}`}>
+            <div key={tx.id || Math.random()} className={`transaction-item ${tx.type || 'unknown'}`}>
               <div className="transaction-icon">
                 {tx.type === 'buy' ? '🟢' : '🔴'}
               </div>
@@ -41,10 +43,10 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ transactions })
               <div className="transaction-details">
                 <div className="transaction-header">
                   <span className="transaction-type">
-                    {tx.type.toUpperCase()}
+                    {(tx.type || 'unknown').toUpperCase()}
                   </span>
                   <span className="transaction-time">
-                    {format(new Date(tx.timestamp), 'MMM dd, HH:mm')}
+                    {tx.timestamp ? format(new Date(tx.timestamp), 'MMM dd, HH:mm') : 'Unknown time'}
                   </span>
                 </div>
                 
@@ -58,15 +60,17 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ transactions })
                 </div>
                 
                 <div className="transaction-meta">
-                  <span className="protocol">{tx.protocol}</span>
-                  <a 
-                    href={`https://solscan.io/tx/${tx.signature}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transaction-link"
-                  >
-                    View on Solscan
-                  </a>
+                  <span className="protocol">{tx.protocol || 'Unknown'}</span>
+                  {tx.signature && (
+                    <a 
+                      href={`https://solscan.io/tx/${tx.signature}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="transaction-link"
+                    >
+                      View on Solscan
+                    </a>
+                  )}
                 </div>
               </div>
             </div>

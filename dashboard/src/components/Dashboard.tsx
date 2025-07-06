@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { DashboardStats, TokenInfo } from '../types';
-import { apiService } from '../services/api';
-import StatsCards from './StatsCards';
-import TransactionChart from './TransactionChart';
-import ProtocolChart from './ProtocolChart';
-import RecentTransactions from './RecentTransactions';
-import TokenInfoCard from './TokenInfoCard';
+import { DashboardStats, TokenInfo, Transaction } from '../types/index.ts';
+import { apiService } from '../services/api.ts';
+import StatsCards from './StatsCards.tsx';
+import TransactionChart from './TransactionChart.tsx';
+import ProtocolChart from './ProtocolChart.tsx';
+import RecentTransactions from './RecentTransactions.tsx';
+import TokenInfoCard from './TokenInfoCard.tsx';
 import './Dashboard.css';
+import { formatISO, subDays } from 'date-fns';
 
 const Dashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [txLoading, setTxLoading] = useState(true);
+  const [txError, setTxError] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState<string>(formatISO(subDays(new Date(), 7), { representation: 'date' }));
+  const [endDate, setEndDate] = useState<string>(formatISO(new Date(), { representation: 'date' }));
 
   const fetchData = async () => {
     try {
@@ -33,14 +39,28 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const fetchTransactions = async () => {
+    try {
+      setTxLoading(true);
+      const txs = await apiService.getRecentTransactions(50, startDate, endDate);
+      setTransactions(txs);
+      setTxError(null);
+    } catch (err) {
+      setTxError('Failed to fetch transactions');
+    } finally {
+      setTxLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
+    fetchTransactions();
     
     // Refresh data every 30 seconds
     const interval = setInterval(fetchData, 30000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [startDate, endDate]);
 
   if (loading) {
     return (
@@ -110,7 +130,34 @@ const Dashboard: React.FC = () => {
         <div className="data-section">
           <div className="transactions-container">
             <h3>Recent Transactions</h3>
-            <RecentTransactions transactions={stats.recentTransactions} />
+            <div className="date-range-picker">
+              <label>
+                Start Date:
+                <input
+                  type="date"
+                  value={startDate.slice(0, 10)}
+                  onChange={e => setStartDate(e.target.value)}
+                />
+              </label>
+              <label>
+                End Date:
+                <input
+                  type="date"
+                  value={endDate.slice(0, 10)}
+                  onChange={e => setEndDate(e.target.value)}
+                />
+              </label>
+              <button onClick={fetchTransactions} disabled={txLoading}>
+                Filter
+              </button>
+            </div>
+            {txLoading ? (
+              <div>Loading transactions...</div>
+            ) : txError ? (
+              <div>{txError}</div>
+            ) : (
+              <RecentTransactions transactions={transactions} />
+            )}
           </div>
           
           <div className="token-container">
