@@ -289,12 +289,6 @@ cd ..
 
 This project is licensed under the MIT License.
 
-## 🙏 Acknowledgments
-
-- Solana Labs for the blockchain infrastructure
-- The Solana community for tools and libraries
-- Contributors and maintainers
-
 ---
 
 **TokenWise** - Empowering traders with real-time Solana wallet intelligence 🧠⚡ 
